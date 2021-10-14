@@ -13,35 +13,35 @@ logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
 application = Flask(__name__)
-CORS(app)
+CORS(application)
 
 
-@app.route('/')
+@application.route('/')
 def hello_world():
     return '<u>Hello World!</u>'
 
 
-@app.route('/imdb/artists/<prefix>')
+@application.route('/imdb/artists/<prefix>')
 def get_artists_by_prefix(prefix):
     res = IMDBArtistResource.get_by_name_prefix(prefix)
     rsp = Response(json.dumps(res), status=200, content_type="application/json")
     return rsp
 
 
-@app.route('/users/')
+@application.route('/users/')
 def get_total_users_info():
     res = UserResource.get_users_info()
     rsp = Response(json.dumps(res, default=str), status=200, content_type="application/json")
     return rsp
 
-@app.route('/users/<prefix>')
+@application.route('/users/<prefix>')
 def get_users_name_prefix(prefix):
     res = StudentsResource.get_by_name_prefix(prefix)
     rsp = Response(json.dumps(res, default=str), status=200, content_type="application/json")
     return rsp
 
 
-@app.route('/<db_schema>/<table_name>/<column_name>/<prefix>')
+@application.route('/<db_schema>/<table_name>/<column_name>/<prefix>')
 def get_by_prefix(db_schema, table_name, column_name, prefix):
     res = RDBService.get_by_prefix(db_schema, table_name, column_name, prefix)
     rsp = Response(json.dumps(res, default=str), status=200, content_type="application/json")
@@ -49,4 +49,4 @@ def get_by_prefix(db_schema, table_name, column_name, prefix):
 
 
 if __name__ == '__main__':
-    application.run()
+    application.run(debug=True)
