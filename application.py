@@ -2,11 +2,26 @@ from flask import Flask, Response
 from flask_cors import CORS
 import json
 import logging
+import pymysql
 
-from application_services.imdb_artists_resource import IMDBArtistResource
-from application_services.students_resource import StudentsResource
-from application_services.UsersResource.user_service import UserResource
-from database_services.RDBService import RDBService as RDBService
+conn = pymysql.connect(
+    host='player-database.cdsowpyuckv0.us-east-1.rds.amazonaws.com',
+    port=3306,
+    user='admin',
+    password='JoshChang1112',
+    db='player'
+)
+
+def get_details(table, column, value):
+    cur = conn.cursor()
+    value = ' '.join(value.split('_'))
+    command = 'SELECT * FROM {} Where {} = {};'.format(
+        table, table+'.'+column, '"' + value + '"'
+    )
+    print(command)
+    cur.execute(command)
+    details = cur.fetchall()
+    return details
 
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger()
@@ -18,33 +33,20 @@ CORS(application)
 
 @application.route('/')
 def hello_world():
-    return '<u>Hello World!</u>'
+    return '<h2>Welcome to player search website!</h2>'
 
 
-@application.route('/imdb/artists/<prefix>')
-def get_artists_by_prefix(prefix):
-    res = IMDBArtistResource.get_by_name_prefix(prefix)
+@application.route('/teams/<teamname>')
+def get_players_by_team(teamname):
+    res = get_details('Profile', 'team_name', teamname)
     rsp = Response(json.dumps(res), status=200, content_type="application/json")
     return rsp
 
 
-@application.route('/users/')
-def get_total_users_info():
-    res = UserResource.get_users_info()
-    rsp = Response(json.dumps(res, default=str), status=200, content_type="application/json")
-    return rsp
-
-@application.route('/users/<prefix>')
-def get_users_name_prefix(prefix):
-    res = StudentsResource.get_by_name_prefix(prefix)
-    rsp = Response(json.dumps(res, default=str), status=200, content_type="application/json")
-    return rsp
-
-
-@application.route('/<db_schema>/<table_name>/<column_name>/<prefix>')
-def get_by_prefix(db_schema, table_name, column_name, prefix):
-    res = RDBService.get_by_prefix(db_schema, table_name, column_name, prefix)
-    rsp = Response(json.dumps(res, default=str), status=200, content_type="application/json")
+@application.route('/pos/<position>')
+def get_players_by_position(position):
+    res = get_details('Profile', 'first_position', position)
+    rsp = Response(json.dumps(res), status=200, content_type="application/json")
     return rsp
 
 
