@@ -9,7 +9,8 @@ conn = pymysql.connect(
     port=3306,
     user='admin',
     password='JoshChang1112',
-    db='player'
+    db='player',
+	cursorclass=pymysql.cursors.DictCursor
 )
 
 def get_details(table, column=None, value=None):
